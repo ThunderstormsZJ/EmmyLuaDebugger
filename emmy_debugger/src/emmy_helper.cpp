@@ -332,7 +332,7 @@ void handleStateClose(lua_State* L)
 	int isNil = lua_isnil(L, -1);
 	lua_pop(L, 1);
 
-	if(!isNil)
+	if (!isNil)
 	{
 		return;
 	}
@@ -394,7 +394,7 @@ void ParsePathParts(const std::string& file, std::vector<std::string>& paths)
 	paths.emplace_back(file.substr(idx));
 }
 
-// glibc å‡½æ•°
+// glibc º¯Êý
 int __strncasecmp(const char* s1, const char* s2, int n)
 {
 	if (n && s1 != s2)
@@ -405,8 +405,7 @@ int __strncasecmp(const char* s1, const char* s2, int n)
 			if (d || *s1 == '\0' || *s2 == '\0') return d;
 			s1++;
 			s2++;
-		}
-		while (--n);
+		} 		while (--n);
 	}
 	return 0;
 }

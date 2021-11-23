@@ -7,7 +7,7 @@
 #include <string>
 #include "utility.h"
 #include "shared/shme.h"
-// ä½¿ç”¨åŸç”Ÿwindows socket API
+// Ê¹ÓÃÔ­Éúwindows socket API
 #include <WinSock2.h>
 #include <WS2tcpip.h>
 #include <thread>
@@ -17,14 +17,14 @@ void SetBreakpoint(HANDLE hProcess, LPVOID entryPoint, bool set, BYTE* data);
 bool InjectDllForProcess(HANDLE hProcess, const char* dllDir, const char* dllFileName);
 
 bool StartProcessAndInjectDll(LPCSTR exeFileName,
-                              LPSTR command,
-                              LPCSTR workDirectory,
-                              LPCSTR dllDirectory,
-                              LPCSTR dllName,
-                              bool blockOnExit,
-                              int debugPort,
-                              bool listenMode,
-                              bool createNewWindow
+	LPSTR command,
+	LPCSTR workDirectory,
+	LPCSTR dllDirectory,
+	LPCSTR dllName,
+	bool blockOnExit,
+	int debugPort,
+	bool listenMode,
+	bool createNewWindow
 )
 {
 	PROCESS_INFORMATION processInfo;
@@ -44,21 +44,21 @@ bool StartProcessAndInjectDll(LPCSTR exeFileName,
 		flags |= CREATE_NEW_CONSOLE;
 	}
 	if (!CreateProcess(nullptr,
-	                   command,
-	                   nullptr,
-	                   nullptr,
-	                   TRUE,
-	                   flags,
-	                   nullptr,
-	                   workDirectory,
-	                   &startUpInfo,
-	                   &processInfo))
+		command,
+		nullptr,
+		nullptr,
+		TRUE,
+		flags,
+		nullptr,
+		workDirectory,
+		&startUpInfo,
+		&processInfo))
 	{
 		//OutputError(GetLastError());
 		return false;
 	}
-	// å¼€å§‹è¿æ¥ debug session
-	// å¼€ä¸€ä¸ªç½‘ç»œè¿æ¥
+	// ¿ªÊ¼Á¬½Ó debug session
+	// ¿ªÒ»¸öÍøÂçÁ¬½Ó
 	WORD version MAKEWORD(2, 2);
 	WSADATA data;
 	WSAStartup(version, &data);
@@ -134,7 +134,7 @@ bool StartProcessAndInjectDll(LPCSTR exeFileName,
 				if (debugEvent.u.Exception.ExceptionRecord.ExceptionCode == EXCEPTION_SINGLE_STEP ||
 					debugEvent.u.Exception.ExceptionRecord.ExceptionCode == EXCEPTION_BREAKPOINT)
 				{
-					// windows åˆå§‹æ–­ç‚¹å¿½ç•¥
+					// windows ³õÊ¼¶ÏµãºöÂÔ
 					if (firstBreakPoint)
 					{
 						firstBreakPoint = false;
@@ -163,12 +163,12 @@ bool StartProcessAndInjectDll(LPCSTR exeFileName,
 							// doesn't continue to run.
 							SuspendThread(processInfo.hThread);
 
-							// çŸ­æš‚çš„åœæ­¢debug
+							// ¶ÌÔİµÄÍ£Ö¹debug
 							DebugActiveProcessStop(processInfo.dwProcessId);
 
 							InjectDllForProcess(processInfo.hProcess, dllDirectory, dllName);
 
-							// ä¼šå°†å­è¿›ç¨‹å’Œè‡ªå·±çš„pidä¼ é€’ç»™debug session
+							// »á½«×Ó½ø³ÌºÍ×Ô¼ºµÄpid´«µİ¸ødebug session
 							std::string sendBuffer = std::to_string(processInfo.dwProcessId);
 							sendBuffer.append("\n");
 							::send(hSocket, const_cast<char*>(sendBuffer.data()), sendBuffer.size(), 0);
@@ -176,7 +176,7 @@ bool StartProcessAndInjectDll(LPCSTR exeFileName,
 							char waitConnected[100] = "0";
 							::recv(hSocket, waitConnected, sizeof(waitConnected), 0);
 
-							// æ¢å¤debug
+							// »Ö¸´debug
 							DebugActiveProcess(processInfo.dwProcessId);
 							ResumeThread(processInfo.hThread);
 
@@ -190,7 +190,7 @@ bool StartProcessAndInjectDll(LPCSTR exeFileName,
 						if (reinterpret_cast<size_t>(debugEvent.u.Exception.ExceptionRecord.ExceptionAddress) ==
 							entryPoint)
 						{
-							// æ­¤æ—¶é‡æ–°å›å½’åˆ°å…¥å£å‡½æ•°
+							// ´ËÊ±ÖØĞÂ»Ø¹éµ½Èë¿Úº¯Êı
 							backToEntry = true;
 							done = true;
 						}
@@ -198,14 +198,14 @@ bool StartProcessAndInjectDll(LPCSTR exeFileName,
 					}
 					else
 					{
-						// å¿½ç•¥æ‰€æœ‰çš„å¼‚å¸¸å¤„ç†ï¼Œç”±è¿›ç¨‹æœ¬èº«çš„ä¾‹ç¨‹å¤„ç†
+						// ºöÂÔËùÓĞµÄÒì³£´¦Àí£¬ÓÉ½ø³Ì±¾ÉíµÄÀı³Ì´¦Àí
 						std::cout << "unhandled C breakPoint at: " << (uint64_t)debugEvent.u.Exception.ExceptionRecord.
 							ExceptionAddress << std::endl;
 					}
 				}
 				else
 				{
-					// å¯¹äºéæ–­ç‚¹å¼‚å¸¸,ç¬¬ä¸€æ¬¡äº¤ç»™è¿›ç¨‹ä¾‹ç¨‹å¤„ç†ï¼Œç¬¬äºŒæ¬¡è¾“å‡ºé”™è¯¯çš„ä¿¡æ¯ï¼Œè®©è¿›ç¨‹è‡ªå·±ç»ˆæ­¢
+					// ¶ÔÓÚ·Ç¶ÏµãÒì³£,µÚÒ»´Î½»¸ø½ø³ÌÀı³Ì´¦Àí£¬µÚ¶ş´ÎÊä³ö´íÎóµÄĞÅÏ¢£¬ÈÃ½ø³Ì×Ô¼ºÖÕÖ¹
 					if (debugEvent.u.Exception.dwFirstChance == 0)
 					{
 						switch (debugEvent.u.Exception.ExceptionRecord.ExceptionCode)
@@ -334,8 +334,8 @@ bool StartProcessAndInjectDll(LPCSTR exeFileName,
 	DebugActiveProcessStop(processInfo.dwProcessId);
 	CloseHandle(processInfo.hThread);
 
-	// å¼€ä¸€ä¸ªçº¿ç¨‹ç­‰å¾…stopæ¶ˆæ¯
-	std::thread t([&hSocket,&hSocket2,&processInfo]()
+	// ¿ªÒ»¸öÏß³ÌµÈ´ıstopÏûÏ¢
+	std::thread t([&hSocket, &hSocket2, &processInfo]()
 	{
 		char waitStop[100] = "0";
 		::recv(hSocket, waitStop, sizeof(waitStop), 0);
@@ -350,7 +350,7 @@ bool StartProcessAndInjectDll(LPCSTR exeFileName,
 	});
 	t.detach();
 
-	//ç­‰å¾…è¿›ç¨‹è‡ªç„¶ç»“æŸ
+	//µÈ´ı½ø³Ì×ÔÈ»½áÊø
 	WaitForSingleObject(processInfo.hProcess, INFINITE);
 
 	DWORD dwExitCode;
@@ -474,12 +474,12 @@ bool ExecuteRemoteKernelFuntion(HANDLE process, const char* functionName, LPVOID
 
 	DWORD threadId;
 	HANDLE thread = CreateRemoteThread(process,
-	                                   nullptr,
-	                                   0,
-	                                   (LPTHREAD_START_ROUTINE)function,
-	                                   param,
-	                                   0,
-	                                   &threadId);
+		nullptr,
+		0,
+		(LPTHREAD_START_ROUTINE)function,
+		param,
+		0,
+		&threadId);
 
 	if (thread != nullptr)
 	{
@@ -564,7 +564,7 @@ bool InjectDll(DWORD processId, const char* dllDir, const char* dllFileName, boo
 	if (capture)
 	{
 		lpParam = (void*)VirtualAllocEx(process, 0, sizeof(RemoteThreadParam), MEM_COMMIT,
-		                                PAGE_READWRITE);
+			PAGE_READWRITE);
 		RemoteThreadParam param;
 		param.bRedirect = TRUE;
 
@@ -577,12 +577,12 @@ bool InjectDll(DWORD processId, const char* dllDir, const char* dllFileName, boo
 	{
 		DWORD threadId;
 		HANDLE thread = CreateRemoteThread(process,
-		                                   nullptr,
-		                                   0,
-		                                   (LPTHREAD_START_ROUTINE)data.lpInit,
-		                                   (void*)lpParam,
-		                                   0,
-		                                   &threadId);
+			nullptr,
+			0,
+			(LPTHREAD_START_ROUTINE)data.lpInit,
+			(void*)lpParam,
+			0,
+			&threadId);
 
 		if (thread != nullptr)
 		{
@@ -613,7 +613,7 @@ bool InjectDll(DWORD processId, const char* dllDir, const char* dllFileName, boo
 	return success;
 }
 
-// å’ŒInjectDll å®ç°ä¸åŒçš„æ˜¯ï¼Œä¸ä¼šcloseHandle
+// ºÍInjectDll ÊµÏÖ²»Í¬µÄÊÇ£¬²»»ácloseHandle
 bool InjectDllForProcess(HANDLE hProcess, const char* dllDir, const char* dllFileName)
 {
 	bool success = true;
@@ -640,12 +640,12 @@ bool InjectDllForProcess(HANDLE hProcess, const char* dllDir, const char* dllFil
 	{
 		DWORD threadId;
 		HANDLE thread = CreateRemoteThread(hProcess,
-		                                   nullptr,
-		                                   0,
-		                                   (LPTHREAD_START_ROUTINE)data.lpInit,
-		                                   nullptr,
-		                                   0,
-		                                   &threadId);
+			nullptr,
+			0,
+			(LPTHREAD_START_ROUTINE)data.lpInit,
+			nullptr,
+			0,
+			&threadId);
 
 		if (thread != nullptr)
 		{
@@ -679,8 +679,8 @@ void ReceiveLog(DWORD processId)
 	while (debugPort < 0x400) debugPort += 0x400;
 	debugPort++;
 
-	// å¼€å§‹è¿æ¥ debug session
-	// å¼€ä¸€ä¸ªç½‘ç»œè¿æ¥
+	// ¿ªÊ¼Á¬½Ó debug session
+	// ¿ªÒ»¸öÍøÂçÁ¬½Ó
 	WORD version MAKEWORD(2, 2);
 	WSADATA data;
 	WSAStartup(version, &data);
@@ -707,7 +707,7 @@ void ReceiveLog(DWORD processId)
 		return;
 	}
 
-	char receiveBuf[10240] = {0};
+	char receiveBuf[10240] = { 0 };
 
 	while (true)
 	{

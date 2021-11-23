@@ -18,28 +18,28 @@ public:
 	~EmmyDebuggerManager();
 
 	/*
-	 * è·å¾—L çš„main thread æ‰€åœ¨çš„ debugger
+	 * »ñµÃL µÄmain thread ËùÔÚµÄ debugger
 	 */
 	std::shared_ptr<Debugger> GetDebugger(lua_State* L);
 
 	/*
-	 * å¦‚æœL æ˜¯main thread åˆ™æ·»åŠ ä¸€ä¸ªæ–°çš„debugger å¦åˆ™è¿”å›ä»–æ‰€åœ¨çš„main threadå¯¹åº”çš„debugger
+	 * Èç¹ûL ÊÇmain thread ÔòÌí¼ÓÒ»¸öĞÂµÄdebugger ·ñÔò·µ»ØËûËùÔÚµÄmain thread¶ÔÓ¦µÄdebugger
 	 */
 	std::shared_ptr<Debugger> AddDebugger(lua_State* L);
 
 	/*
-	 * ä»L è·å–ä¸»lua stateæ‰€åœ¨å¾—debugger ç§»é™¤å¹¶è¿”å›
+	 * ´ÓL »ñÈ¡Ö÷lua stateËùÔÚµÃdebugger ÒÆ³ı²¢·µ»Ø
 	 */
 	std::shared_ptr<Debugger> RemoveDebugger(lua_State* L);
 
 	/*
-	 * è·å¾—æ‰€æœ‰å¾—debugger
+	 * »ñµÃËùÓĞµÃdebugger
 	 */
 	std::vector<std::shared_ptr<Debugger>> GetDebuggers();
 
 	void RemoveAllDebugger();
 	/*
-	 * è·å¾—å½“å‰å‘½ä¸­çš„debugger
+	 * »ñµÃµ±Ç°ÃüÖĞµÄdebugger
 	 */
 	std::shared_ptr<Debugger> GetBreakedpoint();
 
@@ -48,20 +48,20 @@ public:
 	bool IsDebuggerEmpty();
 
 	void AddBreakpoint(std::shared_ptr<BreakPoint> breakpoint);
-	// è¿”å›æ‹·è´åçš„æ–­ç‚¹åˆ—è¡¨
+	// ·µ»Ø¿½±´ºóµÄ¶ÏµãÁĞ±í
 	std::vector<std::shared_ptr<BreakPoint>> GetBreakpoints();
 	void RemoveBreakpoint(const std::string& file, int line);
 	void RemoveAllBreakPoints();
 	void RefreshLineSet();
-	// è¿”å›æ‹·è´åçš„æ–­ç‚¹è¡Œé›†
+	// ·µ»Ø¿½±´ºóµÄ¶ÏµãĞĞ¼¯
 	std::set<int> GetLineSet();
 
 	void HandleBreak(lua_State* L);
 
-	// å“åº”è¡Œä¸º
+	// ÏìÓ¦ĞĞÎª
 	void DoAction(DebugAction action);
 
-	// è®¡ç®—è¡¨è¾¾å¼
+	// ¼ÆËã±í´ïÊ½
 	void Eval(std::shared_ptr<EvalContext> ctx);
 
 	void OnDisconnect();
@@ -70,25 +70,25 @@ public:
 
 	bool IsRunning();
 
-	// public æˆå‘˜æ”¾ä¸‹é¢
+	// public ³ÉÔ±·ÅÏÂÃæ
 	std::shared_ptr<HookStateBreak> stateBreak;
 	std::shared_ptr<HookStateStepOver> stateStepOver;
 	std::shared_ptr<HookStateStepIn> stateStepIn;
 	std::shared_ptr<HookStateStepOut> stateStepOut;
 	std::shared_ptr<HookStateContinue> stateContinue;
 	std::shared_ptr<HookStateStop> stateStop;
-	// æŒ‰é“ç†éœ€è¦åŠ é”
-	// ä½†å®é™…ä¸Šé€šå¸¸ä¸ä¼šæ”¹å˜
-	// æš‚æ—¶ä¸åŠ 
+	// °´µÀÀíĞèÒª¼ÓËø
+	// µ«Êµ¼ÊÉÏÍ¨³£²»»á¸Ä±ä
+	// ÔİÊ±²»¼Ó
 	std::string helperCode;
 	std::vector<std::string> extNames;
 private:
 	UniqueIdentifyType GetUniqueIdentify(lua_State* L);
 
-	// éœ€è¦ä¸€ä¸ªé”ï¼ŒçœŸçš„éœ€è¦è¿™ä¸ªé”å—ï¼Ÿ
+	// ĞèÒªÒ»¸öËø£¬ÕæµÄĞèÒªÕâ¸öËøÂğ£¿
 	std::mutex debuggerMtx;
-	// key æ˜¯å”¯ä¸€æ ‡è®°ï¼ˆå¯¹æ™®é€šluaå°±æ˜¯main stateæŒ‡é’ˆï¼Œå¯¹luajitå°±æ˜¯æ³¨å†Œè¡¨æŒ‡é’ˆï¼‰,value æ˜¯debugger
-	std::map<UniqueIdentifyType , std::shared_ptr<Debugger>> debuggers;
+	// key ÊÇÎ¨Ò»±ê¼Ç£¨¶ÔÆÕÍ¨lua¾ÍÊÇmain stateÖ¸Õë£¬¶Ôluajit¾ÍÊÇ×¢²á±íÖ¸Õë£©,value ÊÇdebugger
+	std::map<UniqueIdentifyType, std::shared_ptr<Debugger>> debuggers;
 
 	std::mutex breakDebuggerMtx;
 	std::shared_ptr<Debugger> breakedDebugger;

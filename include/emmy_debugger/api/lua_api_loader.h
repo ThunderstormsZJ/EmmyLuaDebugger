@@ -17,10 +17,10 @@
 #include <cstddef>
 //luacfg
 typedef double lua_Number;
-// ‰∏çÂêåÁöÑluaÁâàÊú¨ÂÆö‰πâÊòØ‰∏çÂêåÁöÑÔºå‰∏çÂêåÁöÑÂπ≥Âè∞ÂÆö‰πâ‰πüÊòØ‰∏çÂêåÁöÑ
-// x64 ‰∏äÊúÄÁªàÈÉΩÊòØlong long
-// x86 ‰∏älua5.3‰ª•‰∏äÊòØlong longÔºålua5.2‰ª•‰∏ãÊòØptrdiff_tÈÄöÂ∏∏ÊòØint
-// ‰º†ÂèÇÊó∂
+// ≤ªÕ¨µƒlua∞Ê±æ∂®“Â «≤ªÕ¨µƒ£¨≤ªÕ¨µƒ∆ΩÃ®∂®“Â“≤ «≤ªÕ¨µƒ
+// x64 …œ◊Ó÷’∂º «long long
+// x86 …œlua5.3“‘…œ «long long£¨lua5.2“‘œ¬ «ptrdiff_tÕ®≥£ «int
+// ¥´≤Œ ±
 typedef long long lua_Integer;
 typedef ptrdiff_t lua_KContext;
 
@@ -65,26 +65,26 @@ typedef ptrdiff_t lua_KContext;
 /*
 ** Type for C functions registered with Lua
 */
-typedef int(*lua_CFunction) (lua_State *L);
+typedef int(*lua_CFunction) (lua_State* L);
 
 /*
 ** Type for continuation functions
 */
-typedef int(*lua_KFunction) (lua_State *L, int status, lua_KContext ctx);
+typedef int(*lua_KFunction) (lua_State* L, int status, lua_KContext ctx);
 
 
 /*
 ** Type for functions that read/write blocks when loading/dumping Lua chunks
 */
-typedef const char * (*lua_Reader) (lua_State *L, void *ud, size_t *sz);
+typedef const char* (*lua_Reader) (lua_State* L, void* ud, size_t* sz);
 
-typedef int(*lua_Writer) (lua_State *L, const void *p, size_t sz, void *ud);
+typedef int(*lua_Writer) (lua_State* L, const void* p, size_t sz, void* ud);
 
 
 /*
 ** Type for memory-allocation functions
 */
-typedef void * (*lua_Alloc) (void *ud, void *ptr, size_t osize, size_t nsize);
+typedef void* (*lua_Alloc) (void* ud, void* ptr, size_t osize, size_t nsize);
 
 //debug
 /*
@@ -110,10 +110,10 @@ typedef void * (*lua_Alloc) (void *ud, void *ptr, size_t osize, size_t nsize);
 
 struct lua_Debug_51 {
 	int event;
-	const char *name;	/* (n) */
-	const char *namewhat;	/* (n) `global', `local', `field', `method' */
-	const char *what;	/* (S) `Lua', `C', `main', `tail' */
-	const char *source;	/* (S) */
+	const char* name;	/* (n) */
+	const char* namewhat;	/* (n) `global', `local', `field', `method' */
+	const char* what;	/* (S) `Lua', `C', `main', `tail' */
+	const char* source;	/* (S) */
 	int currentline;	/* (l) */
 	int nups;		/* (u) number of upvalues */
 	int linedefined;	/* (S) */
@@ -125,10 +125,10 @@ struct lua_Debug_51 {
 
 struct lua_Debug_52 {
 	int event;
-	const char *name;	/* (n) */
-	const char *namewhat;	/* (n) 'global', 'local', 'field', 'method' */
-	const char *what;	/* (S) 'Lua', 'C', 'main', 'tail' */
-	const char *source;	/* (S) */
+	const char* name;	/* (n) */
+	const char* namewhat;	/* (n) 'global', 'local', 'field', 'method' */
+	const char* what;	/* (S) 'Lua', 'C', 'main', 'tail' */
+	const char* source;	/* (S) */
 	int currentline;	/* (l) */
 	int linedefined;	/* (S) */
 	int lastlinedefined;	/* (S) */
@@ -138,15 +138,15 @@ struct lua_Debug_52 {
 	char istailcall;	/* (t) */
 	char short_src[LUA_IDSIZE]; /* (S) */
 	/* private part */
-	struct CallInfo *i_ci;  /* active function */
+	struct CallInfo* i_ci;  /* active function */
 };
 
 struct lua_Debug_53 {
 	int event;
-	const char *name;	/* (n) */
-	const char *namewhat;	/* (n) 'global', 'local', 'field', 'method' */
-	const char *what;	/* (S) 'Lua', 'C', 'main', 'tail' */
-	const char *source;	/* (S) */
+	const char* name;	/* (n) */
+	const char* namewhat;	/* (n) 'global', 'local', 'field', 'method' */
+	const char* what;	/* (S) 'Lua', 'C', 'main', 'tail' */
+	const char* source;	/* (S) */
 	int currentline;	/* (l) */
 	int linedefined;	/* (S) */
 	int lastlinedefined;	/* (S) */
@@ -156,7 +156,7 @@ struct lua_Debug_53 {
 	char istailcall;	/* (t) */
 	char short_src[LUA_IDSIZE]; /* (S) */
 	/* private part */
-	struct CallInfo *i_ci;  /* active function */
+	struct CallInfo* i_ci;  /* active function */
 };
 
 struct lua_Debug_54 {
@@ -198,11 +198,11 @@ const char* getDebugName(lua_Debug* ar);
 
 
 /* Functions to be called by the debugger in specific events */
-typedef void(*lua_Hook) (lua_State *L, lua_Debug *ar);
+typedef void(*lua_Hook) (lua_State* L, lua_Debug* ar);
 
 //#include "lauxlib.h"
 typedef struct luaL_Reg {
-	const char *name;
+	const char* name;
 	lua_CFunction func;
 } luaL_Reg;
 
@@ -251,9 +251,9 @@ typedef void (*dll_lua_settop)(lua_State* L, int idx);
 DEF_LUA_API(lua_settop);
 typedef int (*dll_lua_type)(lua_State* L, int idx);
 DEF_LUA_API(lua_type);
-typedef const char*(*dll_lua_typename)(lua_State* L, int tp);
+typedef const char* (*dll_lua_typename)(lua_State* L, int tp);
 DEF_LUA_API(lua_typename);
-typedef const char*(*dll_lua_tolstring)(lua_State* L, int idx, size_t* len);
+typedef const char* (*dll_lua_tolstring)(lua_State* L, int idx, size_t* len);
 DEF_LUA_API(lua_tolstring);
 typedef int (*dll_lua_toboolean)(lua_State* L, int idx);
 DEF_LUA_API(lua_toboolean);
@@ -261,9 +261,9 @@ typedef void (*dll_lua_pushnil)(lua_State* L);
 DEF_LUA_API(lua_pushnil);
 typedef void (*dll_lua_pushnumber)(lua_State* L, lua_Number n);
 DEF_LUA_API(lua_pushnumber);
-typedef const char*(*dll_lua_pushlstring)(lua_State* L, const char* s, size_t len);
+typedef const char* (*dll_lua_pushlstring)(lua_State* L, const char* s, size_t len);
 DEF_LUA_API(lua_pushlstring);
-typedef const char*(*dll_lua_pushstring)(lua_State* L, const char* s);
+typedef const char* (*dll_lua_pushstring)(lua_State* L, const char* s);
 DEF_LUA_API(lua_pushstring);
 typedef void (*dll_lua_pushcclosure)(lua_State* L, lua_CFunction fn, int n);
 DEF_LUA_API(lua_pushcclosure);
@@ -285,35 +285,35 @@ typedef int (*dll_lua_getstack)(lua_State* L, int level, lua_Debug* ar);
 DEF_LUA_API(lua_getstack);
 typedef int (*dll_lua_getinfo)(lua_State* L, const char* what, lua_Debug* ar);
 DEF_LUA_API(lua_getinfo);
-typedef const char*(*dll_lua_getlocal)(lua_State* L, const lua_Debug* ar, int n);
+typedef const char* (*dll_lua_getlocal)(lua_State* L, const lua_Debug* ar, int n);
 DEF_LUA_API(lua_getlocal);
-typedef const char*(*dll_lua_getupvalue)(lua_State* L, int funcindex, int n);
+typedef const char* (*dll_lua_getupvalue)(lua_State* L, int funcindex, int n);
 DEF_LUA_API(lua_getupvalue);
-typedef const char*(*dll_lua_setupvalue)(lua_State* L, int funcindex, int n);
+typedef const char* (*dll_lua_setupvalue)(lua_State* L, int funcindex, int n);
 DEF_LUA_API(lua_setupvalue);
 typedef void (*dll_lua_sethook)(lua_State* L, lua_Hook func, int mask, int count);
 DEF_LUA_API(lua_sethook);
 typedef int (*dll_luaL_loadstring)(lua_State* L, const char* s);
 DEF_LUA_API(luaL_loadstring);
-typedef const char*(*dll_luaL_checklstring)(lua_State* L, int arg, size_t* l);
+typedef const char* (*dll_luaL_checklstring)(lua_State* L, int arg, size_t* l);
 DEF_LUA_API(luaL_checklstring);
-typedef lua_Number (*dll_luaL_checknumber)(lua_State* L, int arg);
+typedef lua_Number(*dll_luaL_checknumber)(lua_State* L, int arg);
 DEF_LUA_API(luaL_checknumber);
-typedef void*(*dll_lua_topointer)(lua_State* L, int index);
+typedef void* (*dll_lua_topointer)(lua_State* L, int index);
 DEF_LUA_API(lua_topointer);
-typedef int(*dll_lua_getmetatable)(lua_State *L, int objindex);
+typedef int(*dll_lua_getmetatable)(lua_State* L, int objindex);
 DEF_LUA_API(lua_getmetatable);
-typedef int(*dll_lua_rawget)(lua_State *L, int idx);
+typedef int(*dll_lua_rawget)(lua_State* L, int idx);
 DEF_LUA_API(lua_rawget);
-typedef void(*dll_lua_rawset)(lua_State *L, int idx);
+typedef void(*dll_lua_rawset)(lua_State* L, int idx);
 DEF_LUA_API(lua_rawset);
-typedef void(*dll_lua_pushlightuserdata)(lua_State *L, void *p);
+typedef void(*dll_lua_pushlightuserdata)(lua_State* L, void* p);
 DEF_LUA_API(lua_pushlightuserdata);
-typedef void*(*dll_lua_touserdata)(lua_State *L, int idx);
+typedef void* (*dll_lua_touserdata)(lua_State* L, int idx);
 DEF_LUA_API(lua_touserdata);
-typedef void*(*dll_lua_rawseti)(lua_State *L, int idx, lua_Integer n);
+typedef void* (*dll_lua_rawseti)(lua_State* L, int idx, lua_Integer n);
 DEF_LUA_API(lua_rawseti);
-typedef void*(*dll_lua_rawgeti)(lua_State *L, int idx, lua_Integer n);
+typedef void* (*dll_lua_rawgeti)(lua_State* L, int idx, lua_Integer n);
 DEF_LUA_API(lua_rawgeti);
 typedef void* (*dll_luaL_newstate)(void);
 DEF_LUA_API(luaL_newstate);
@@ -325,9 +325,9 @@ DEF_LUA_API(lua_pushthread);
 //51
 typedef int (*dll_e_lua_setfenv)(lua_State* L, int idx);
 DEF_LUA_API_E(lua_setfenv);
-typedef lua_Integer (*dll_e_lua_tointeger)(lua_State* L, int idx);
+typedef lua_Integer(*dll_e_lua_tointeger)(lua_State* L, int idx);
 DEF_LUA_API_E(lua_tointeger);
-typedef lua_Number(*dll_e_lua_tonumber) (lua_State *L, int idx);
+typedef lua_Number(*dll_e_lua_tonumber) (lua_State* L, int idx);
 DEF_LUA_API_E(lua_tonumber);
 typedef int (*dll_e_lua_call)(lua_State* L, int nargs, int nresults);
 DEF_LUA_API_E(lua_call);
@@ -338,12 +338,12 @@ DEF_LUA_API_E(lua_insert);
 
 
 //51 & 52
-typedef void (*dll_e_lua_remove)(lua_State *L, int idx);
+typedef void (*dll_e_lua_remove)(lua_State* L, int idx);
 DEF_LUA_API_E(lua_remove);
 //52 & 53 & 54
-typedef lua_Integer (*dll_e_lua_tointegerx)(lua_State* L, int idx, int* isnum);
+typedef lua_Integer(*dll_e_lua_tointegerx)(lua_State* L, int idx, int* isnum);
 DEF_LUA_API_E(lua_tointegerx);
-typedef lua_Number(*dll_e_lua_tonumberx) (lua_State *L, int idx, int *isnum);
+typedef lua_Number(*dll_e_lua_tonumberx) (lua_State* L, int idx, int* isnum);
 DEF_LUA_API_E(lua_tonumberx);
 typedef int (*dll_e_lua_getglobal)(lua_State* L, const char* name);
 DEF_LUA_API_E(lua_getglobal);
@@ -355,9 +355,9 @@ typedef int (*dll_e_lua_pcallk)(lua_State* L, int nargs, int nresults, int errfu
 DEF_LUA_API_E(lua_pcallk);
 typedef void (*dll_e_luaL_setfuncs)(lua_State* L, const luaL_Reg* l, int nup);
 DEF_LUA_API_E(luaL_setfuncs);
-typedef int(*dll_e_lua_absindex)(lua_State *L, int idx);
+typedef int(*dll_e_lua_absindex)(lua_State* L, int idx);
 DEF_LUA_API_E(lua_absindex);
-typedef int(*dll_e_lua_rawgetp)(lua_State *L, int idx, const void* p);
+typedef int(*dll_e_lua_rawgetp)(lua_State* L, int idx, const void* p);
 DEF_LUA_API_E(lua_rawgetp);
 typedef void(*dll_e_lua_rawsetp)(lua_State* L, int idx, const void* p);
 DEF_LUA_API_E(lua_rawsetp);
@@ -368,7 +368,7 @@ DEF_LUA_API_E(lua_pushthread);
 typedef void* (*dll_e_lua_newuserdata)(lua_State* L, int size);
 DEF_LUA_API_E(lua_newuserdata);
 //53
-typedef void (*dll_e_lua_rotate)(lua_State *L, int idx, int n);
+typedef void (*dll_e_lua_rotate)(lua_State* L, int idx, int n);
 DEF_LUA_API_E(lua_rotate);
 
 //54
@@ -386,10 +386,10 @@ int lua_getglobal(lua_State* L, const char* name);
 void lua_setglobal(lua_State* L, const char* name);
 int lua_pcall(lua_State* L, int nargs, int nresults, int errfunc);
 int lua_upvalueindex(int i);
-int lua_absindex(lua_State *L, int idx);
+int lua_absindex(lua_State* L, int idx);
 void lua_call(lua_State* L, int nargs, int nresults);
 void luaL_setfuncs(lua_State* L, const luaL_Reg* l, int nup);
-void lua_remove(lua_State *L, int idx);
+void lua_remove(lua_State* L, int idx);
 void* lua_newuserdata(lua_State* L, int size);
 void lua_pushglobaltable(lua_State* L);
 int lua_rawgetp(lua_State* L, int idx, const void* p);

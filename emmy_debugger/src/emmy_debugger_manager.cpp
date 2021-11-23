@@ -4,12 +4,12 @@
 
 EmmyDebuggerManager::EmmyDebuggerManager()
 	: stateBreak(std::make_shared<HookStateBreak>()),
-	  stateContinue(std::make_shared<HookStateContinue>()),
-	  stateStepOver(std::make_shared<HookStateStepOver>()),
-	  stateStop(std::make_shared<HookStateStop>()),
-	  stateStepIn(std::make_shared<HookStateStepIn>()),
-	  stateStepOut(std::make_shared<HookStateStepOut>()),
-	  isRunning(false)
+	stateContinue(std::make_shared<HookStateContinue>()),
+	stateStepOver(std::make_shared<HookStateStepOver>()),
+	stateStop(std::make_shared<HookStateStop>()),
+	stateStepIn(std::make_shared<HookStateStepIn>()),
+	stateStepOut(std::make_shared<HookStateStepOut>()),
+	isRunning(false)
 {
 }
 
@@ -50,8 +50,8 @@ std::shared_ptr<Debugger> EmmyDebuggerManager::AddDebugger(lua_State* L)
 		}
 		else
 		{
-			// å¦‚æœé¦–æ¬¡add çš„stateä¸æ˜¯main stateï¼Œåˆ™main stateè§†ä¸ºç©ºæŒ‡é’ˆ
-			// ä½†ä¸å½±å“luajité™„åŠ è°ƒè¯•å’Œè¿œç¨‹è°ƒè¯•
+			// Èç¹ûÊ×´Îadd µÄstate²»ÊÇmain state£¬Ôòmain stateÊÓÎª¿ÕÖ¸Õë
+			// µ«²»Ó°Ïìluajit¸½¼Óµ÷ÊÔºÍÔ¶³Ìµ÷ÊÔ
 			lua_State* mainState = nullptr;
 
 			int ret = lua_pushthread(L);
@@ -63,7 +63,7 @@ std::shared_ptr<Debugger> EmmyDebuggerManager::AddDebugger(lua_State* L)
 
 			debugger = std::make_shared<Debugger>(mainState, shared_from_this());
 		}
-		debuggers.insert({identify, debugger});
+		debuggers.insert({ identify, debugger });
 	}
 	else
 	{
@@ -240,9 +240,9 @@ void EmmyDebuggerManager::SetRunning(bool value)
 {
 	std::lock_guard<std::mutex> lock(isRuningMtx);
 	isRunning = value;
-	if(isRunning)
+	if (isRunning)
 	{
-		for(auto debugger: GetDebuggers())
+		for (auto debugger : GetDebuggers())
 		{
 			debugger->Start();
 		}
@@ -259,7 +259,7 @@ EmmyDebuggerManager::UniqueIdentifyType EmmyDebuggerManager::GetUniqueIdentify(l
 {
 	if (luaVersion == LuaVersion::LUA_JIT)
 	{
-		// æˆ‘ä»¬è®¤ä¸ºluajitåªä¼šæœ‰ä¸€ä¸ªdebugger
+		// ÎÒÃÇÈÏÎªluajitÖ»»áÓĞÒ»¸ödebugger
 		return 0;
 	}
 	else

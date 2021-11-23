@@ -32,7 +32,7 @@ void WaitConnectedHook(lua_State* L, lua_Debug* ar)
 	// std::lock_guard<std::mutex> lock()
 }
 
-Debugger::Debugger(lua_State* L, std::shared_ptr<EmmyDebuggerManager> manager):
+Debugger::Debugger(lua_State* L, std::shared_ptr<EmmyDebuggerManager> manager) :
 	currentL(L),
 	mainL(L),
 	manager(manager),
@@ -66,7 +66,7 @@ void Debugger::Attach()
 		ExecuteOnLuaThread([this](lua_State* L)
 		{
 			const int t = lua_gettop(L);
-			// åˆ¤æ–­æ˜¯ä¸æ˜¯ä¸»lua_state
+			// ÅĞ¶ÏÊÇ²»ÊÇÖ÷lua_state
 			int ret = lua_pushthread(L);
 			if (ret == 1)
 			{
@@ -121,12 +121,12 @@ void Debugger::Hook(lua_Debug* ar, lua_State* L)
 	{
 		return;
 	}
-	// è®¾ç½®å½“å‰åç¨‹
+	// ÉèÖÃµ±Ç°Ğ­³Ì
 	currentL = L;
 
 	if (getDebugEvent(ar) == LUA_HOOKLINE)
 	{
-		// å¯¹luaTreadExecutors æ‰§è¡ŒåŠ é”
+		// ¶ÔluaTreadExecutors Ö´ĞĞ¼ÓËø
 		{
 			std::unique_lock<std::mutex> lock(luaThreadMtx);
 			if (!luaThreadExecutors.empty())
@@ -144,7 +144,7 @@ void Debugger::Hook(lua_Debug* ar, lua_State* L)
 			HandleBreak();
 			return;
 		}
-		// åŠ é”
+		// ¼ÓËø
 
 		std::shared_ptr<HookState> state = nullptr;
 
@@ -167,13 +167,13 @@ void Debugger::Stop()
 	skipHook = true;
 	blocking = false;
 
-	// åœæ­¢main_state çš„hook
-	// ä½†ä¸åœæ­¢coroutineçš„hookå› ä¸ºæ²¡æœ‰åŠæ³•çŸ¥é“è¿™ä¸ªlua state æŒ‡é’ˆæ˜¯å¦æœ‰æ•ˆ
-	// stopåœ¨äº¤äº’çº¿ç¨‹ï¼Œä¸åº”è¯¥è®¾ç½®hook
-	// è€Œä¸”æ¸…ç†å¯¹lua_state çš„ hookæ²¡æœ‰å¿…è¦
+	// Í£Ö¹main_state µÄhook
+	// µ«²»Í£Ö¹coroutineµÄhookÒòÎªÃ»ÓĞ°ì·¨ÖªµÀÕâ¸ölua state Ö¸ÕëÊÇ·ñÓĞĞ§
+	// stopÔÚ½»»¥Ïß³Ì£¬²»Ó¦¸ÃÉèÖÃhook
+	// ¶øÇÒÇåÀí¶Ôlua_state µÄ hookÃ»ÓĞ±ØÒª
 	// UpdateHook(0, mainL);
 
-	// æ¸…ç†hook çŠ¶æ€
+	// ÇåÀíhook ×´Ì¬
 	{
 		std::lock_guard<std::mutex> lock(hookStateMtx);
 		hookState = nullptr;
@@ -318,7 +318,7 @@ void Debugger::GetVariable(std::shared_ptr<Variable> variable, int index, int de
 
 	auto L = currentL;
 
-	// å¦‚æœæ²¡æœ‰è®¡ç®—æ·±åº¦åˆ™ä¸äºˆè®¡ç®—
+	// Èç¹ûÃ»ÓĞ¼ÆËãÉî¶ÈÔò²»Óè¼ÆËã
 	if (depth <= 0)
 	{
 		return;
@@ -343,136 +343,136 @@ void Debugger::GetVariable(std::shared_ptr<Variable> variable, int index, int de
 	switch (type)
 	{
 	case LUA_TNIL:
-		{
-			variable->value = "nil";
-			break;
-		}
+	{
+		variable->value = "nil";
+		break;
+	}
 	case LUA_TNUMBER:
-		{
-			variable->value = lua_tostring(L, index);
-			break;
-		}
+	{
+		variable->value = lua_tostring(L, index);
+		break;
+	}
 	case LUA_TBOOLEAN:
-		{
-			const bool v = lua_toboolean(L, index);
-			variable->value = v ? "true" : "false";
-			break;
-		}
+	{
+		const bool v = lua_toboolean(L, index);
+		variable->value = v ? "true" : "false";
+		break;
+	}
 	case LUA_TSTRING:
-		{
-			variable->value = lua_tostring(L, index);
-			break;
-		}
+	{
+		variable->value = lua_tostring(L, index);
+		break;
+	}
 	case LUA_TUSERDATA:
+	{
+		auto* string = lua_tostring(L, index);
+		if (string == nullptr)
 		{
-			auto* string = lua_tostring(L, index);
-			if (string == nullptr)
+			int result;
+			if (CallMetaFunction(L, topIndex, "__tostring", 1, result) && result == 0)
 			{
-				int result;
-				if (CallMetaFunction(L, topIndex, "__tostring", 1, result) && result == 0)
-				{
-					string = lua_tostring(L, -1);
-					lua_pop(L, 1);
-				}
+				string = lua_tostring(L, -1);
+				lua_pop(L, 1);
 			}
-			if (string)
-			{
-				variable->value = string;
-			}
-			else
-			{
-				variable->value = ToPointer(L, index);
-			}
-			if (depth > 1)
-			{
-				if (lua_getmetatable(L, index))
-				{
-					GetVariable(variable, -1, depth);
-					lua_pop(L, 1); //pop meta
-				}
-			}
-			break;
 		}
+		if (string)
+		{
+			variable->value = string;
+		}
+		else
+		{
+			variable->value = ToPointer(L, index);
+		}
+		if (depth > 1)
+		{
+			if (lua_getmetatable(L, index))
+			{
+				GetVariable(variable, -1, depth);
+				lua_pop(L, 1); //pop meta
+			}
+		}
+		break;
+	}
 	case LUA_TFUNCTION:
 	case LUA_TLIGHTUSERDATA:
 	case LUA_TTHREAD:
-		{
-			variable->value = ToPointer(L, index);
-			break;
-		}
+	{
+		variable->value = ToPointer(L, index);
+		break;
+	}
 	case LUA_TTABLE:
+	{
+		std::size_t tableSize = 0;
+		const void* tableAddr = lua_topointer(L, index);
+		lua_pushnil(L);
+		while (lua_next(L, index))
 		{
-			std::size_t tableSize = 0;
-			const void* tableAddr = lua_topointer(L, index);
-			lua_pushnil(L);
-			while (lua_next(L, index))
+			// k: -2, v: -1
+			if (depth > 1)
 			{
-				// k: -2, v: -1
-				if (depth > 1)
+				//todo: use allocator
+				auto v = std::make_shared<Variable>();
+				const auto t = lua_type(L, -2);
+				v->nameType = t;
+				if (t == LUA_TSTRING || t == LUA_TNUMBER || t == LUA_TBOOLEAN)
 				{
-					//todo: use allocator
-					auto v = std::make_shared<Variable>();
-					const auto t = lua_type(L, -2);
-					v->nameType = t;
-					if (t == LUA_TSTRING || t == LUA_TNUMBER || t == LUA_TBOOLEAN)
-					{
-						lua_pushvalue(L, -2); // avoid error: "invalid key to 'next'" ???
-						v->name = lua_tostring(L, -1);
-						lua_pop(L, 1);
-					}
-					else
-					{
-						v->name = ToPointer(L, -2);
-					}
-					GetVariable(v, -1, depth - 1);
-					variable->children.push_back(v);
-				}
-				lua_pop(L, 1);
-				tableSize++;
-			}
-
-
-			if (lua_getmetatable(L, index))
-			{
-				// metatable
-				auto metatable = std::make_shared<Variable>();
-				metatable->name = "(metatable)";
-				metatable->nameType = LUA_TSTRING;
-
-				GetVariable(metatable, -1, depth - 1);
-				variable->children.push_back(metatable);
-
-				//__index
-				{
-					lua_getfield(L, -1, "__index");
-					if (!lua_isnil(L, -1))
-					{
-						auto v = std::make_shared<Variable>();
-						v->name = "(metatable.__index)";
-						v->nameType = LUA_TSTRING;
-						GetVariable(v, -1, depth - 1);
-						variable->children.push_back(v);
-						// if (depth > 1)
-						// {
-						// 	for (auto child : v->children)
-						// 	{
-						// 		variable->children.push_back(child->Clone());
-						// 	}
-						// }
-						// tableSize += v->children.size();
-					}
+					lua_pushvalue(L, -2); // avoid error: "invalid key to 'next'" ???
+					v->name = lua_tostring(L, -1);
 					lua_pop(L, 1);
 				}
+				else
+				{
+					v->name = ToPointer(L, -2);
+				}
+				GetVariable(v, -1, depth - 1);
+				variable->children.push_back(v);
+			}
+			lua_pop(L, 1);
+			tableSize++;
+		}
 
-				// metatable
+
+		if (lua_getmetatable(L, index))
+		{
+			// metatable
+			auto metatable = std::make_shared<Variable>();
+			metatable->name = "(metatable)";
+			metatable->nameType = LUA_TSTRING;
+
+			GetVariable(metatable, -1, depth - 1);
+			variable->children.push_back(metatable);
+
+			//__index
+			{
+				lua_getfield(L, -1, "__index");
+				if (!lua_isnil(L, -1))
+				{
+					auto v = std::make_shared<Variable>();
+					v->name = "(metatable.__index)";
+					v->nameType = LUA_TSTRING;
+					GetVariable(v, -1, depth - 1);
+					variable->children.push_back(v);
+					// if (depth > 1)
+					// {
+					// 	for (auto child : v->children)
+					// 	{
+					// 		variable->children.push_back(child->Clone());
+					// 	}
+					// }
+					// tableSize += v->children.size();
+				}
 				lua_pop(L, 1);
 			}
 
-			std::stringstream ss;
-			ss << "table(0x" << std::hex << tableAddr << std::dec << ", size = " << tableSize << ")";
-			variable->value = ss.str();
-			break;
+			// metatable
+			lua_pop(L, 1);
 		}
+
+		std::stringstream ss;
+		ss << "table(0x" << std::hex << tableAddr << std::dec << ", size = " << tableSize << ")";
+		variable->value = ss.str();
+		break;
+	}
 	}
 	const int t2 = lua_gettop(L);
 	assert(t2 == topIndex);
@@ -504,7 +504,7 @@ void Debugger::CacheValue(int valueIndex, std::shared_ptr<Variable> variable) co
 
 		lua_pushvalue(L, valueIndex); // 1: cacheTable, 2: value
 
-		// snprintf æ€§èƒ½ä¸å¤Ÿï¼Œé—®é¢˜ä¹Ÿå¾ˆå¤§ï¼Œè¿™é‡Œé‡‡ç”¨c++æ ‡å‡†ç®—æ³•
+		// snprintf ĞÔÄÜ²»¹»£¬ÎÊÌâÒ²ºÜ´ó£¬ÕâÀï²ÉÓÃc++±ê×¼Ëã·¨
 		std::string key = std::to_string(id);
 		lua_setfield(L, -2, key.c_str()); // 1: cacheTable
 
@@ -530,7 +530,7 @@ void Debugger::CacheValue(int valueIndex, std::shared_ptr<Variable> variable) co
 // 		}
 // 		lua_pushvalue(L, valueIndex); // 1: cacheTable, 2: value
 //
-// 		// snprintf æ€§èƒ½ä¸å¤Ÿï¼Œé—®é¢˜ä¹Ÿå¾ˆå¤§ï¼Œè¿™é‡Œé‡‡ç”¨c++æ ‡å‡†ç®—æ³•
+// 		// snprintf ĞÔÄÜ²»¹»£¬ÎÊÌâÒ²ºÜ´ó£¬ÕâÀï²ÉÓÃc++±ê×¼Ëã·¨
 // 		std::string Key = std::to_string(id);
 // 		lua_setfield(L, -2, Key.c_str()); // 1: cacheTable
 //
@@ -559,7 +559,7 @@ void Debugger::ClearCache() const
 
 void Debugger::DoAction(DebugAction action)
 {
-	// é”åŠ åˆ°è¿™é‡Œ
+	// Ëø¼Óµ½ÕâÀï
 	std::lock_guard<std::mutex> lock(hookStateMtx);
 	switch (action)
 	{
@@ -917,7 +917,7 @@ bool Debugger::Eval(std::shared_ptr<EvalContext> evalContext, bool force)
 	{
 		return false;
 	}
-	// åŠ é”
+	// ¼ÓËø
 	{
 		std::unique_lock<std::mutex> lock(evalMtx);
 		evalQueue.push(evalContext);
@@ -970,9 +970,9 @@ bool Debugger::DoEval(std::shared_ptr<EvalContext> evalContext)
 #ifndef EMMY_USE_LUA_SOURCE
 	lua_setfenv(L, fIdx);
 #elif defined(EMMY_LUA_51) || defined(EMMY_LUA_JIT)
-    lua_setfenv(L, fIdx);
+	lua_setfenv(L, fIdx);
 #else //52 & 53
-    lua_setupvalue(L, fIdx, 1);
+	lua_setupvalue(L, fIdx, 1);
 #endif
 	assert(lua_gettop(L) == fIdx);
 	// call function() return expr end
@@ -995,9 +995,9 @@ bool Debugger::DoEval(std::shared_ptr<EvalContext> evalContext)
 void Debugger::DoLogMessage(std::shared_ptr<BreakPoint> bp)
 {
 	std::string& logMessage = bp->logMessage;
-	// ä¸ºä»€ä¹ˆä¸ç”¨regex?
-	// å› ä¸ºgcc 4.8 regexè¿˜æ˜¯ç©ºå®ç°
-	// è€Œä¸”åç»­ç‰ˆæœ¬çš„gccä¸­æ­£åˆ™è¡¨è¾¾å¼è¡Œä¸ºä¼¼ä¹ä¹Ÿä¸å¤ªæ­£å¸¸
+	// ÎªÊ²Ã´²»ÓÃregex?
+	// ÒòÎªgcc 4.8 regex»¹ÊÇ¿ÕÊµÏÖ
+	// ¶øÇÒºóĞø°æ±¾µÄgccÖĞÕıÔò±í´ïÊ½ĞĞÎªËÆºõÒ²²»Ì«Õı³£
 	enum class ParseState
 	{
 		Normal,
@@ -1012,7 +1012,7 @@ void Debugger::DoLogMessage(std::shared_ptr<BreakPoint> bp)
 
 	std::size_t rightBraceBegin = 0;
 
-	// å¦‚æœåœ¨è¡¨è¾¾å¼ä¸­å‡ºç°å·¦å¤§æ‹¬å·
+	// Èç¹ûÔÚ±í´ïÊ½ÖĞ³öÏÖ×ó´óÀ¨ºÅ
 	std::size_t exprLeftCount = 0;
 
 
@@ -1023,66 +1023,66 @@ void Debugger::DoLogMessage(std::shared_ptr<BreakPoint> bp)
 		switch (state)
 		{
 		case ParseState::Normal:
+		{
+			if (ch == '{')
 			{
-				if (ch == '{')
-				{
-					state = ParseState::LeftBrace;
-					leftBraceBegin = index;
-					exprLeftCount = 0;
-				}
-				else if (ch == '}')
-				{
-					state = ParseState::RightBrace;
-					rightBraceBegin = index;
-				}
-				break;
+				state = ParseState::LeftBrace;
+				leftBraceBegin = index;
+				exprLeftCount = 0;
 			}
+			else if (ch == '}')
+			{
+				state = ParseState::RightBrace;
+				rightBraceBegin = index;
+			}
+			break;
+		}
 		case ParseState::LeftBrace:
+		{
+			if (ch == '{')
 			{
-				if (ch == '{')
+				// ÈÏÎªÊÇ×óË«´óÀ¨ºÅ×ªÒåÎª¿É¼ûµÄ'{'
+				if (index == leftBraceBegin + 1)
 				{
-					// è®¤ä¸ºæ˜¯å·¦åŒå¤§æ‹¬å·è½¬ä¹‰ä¸ºå¯è§çš„'{'
-					if (index == leftBraceBegin + 1)
-					{
-						replaceExpresses.emplace_back("{", leftBraceBegin, index, false);
-						state = ParseState::Normal;
-					}
-					else
-					{
-						exprLeftCount++;
-					}
-				}
-				else if (ch == '}')
-				{
-					// è®¤ä¸ºæ˜¯è¡¨è¾¾å¼å†…çš„å¤§æ‹¬å·
-					if (exprLeftCount > 0)
-					{
-						exprLeftCount--;
-						continue;
-					}
-
-					replaceExpresses.emplace_back(logMessage.substr(leftBraceBegin + 1, index - leftBraceBegin - 1),
-					                              leftBraceBegin, index, true);
-
-
+					replaceExpresses.emplace_back("{", leftBraceBegin, index, false);
 					state = ParseState::Normal;
-				}
-				break;
-			}
-		case ParseState::RightBrace:
-			{
-				if (ch == '}' && (index == rightBraceBegin + 1))
-				{
-					replaceExpresses.emplace_back("}", rightBraceBegin, index, false);
 				}
 				else
 				{
-					//è®¤ä¸ºå·¦å³å¤§æ‹¬å·å¤±é…ï¼Œä¹‹å‰çš„ä¸åšå¤„ç†ï¼Œé€€æ ¼ä¸€ä½å›å»é‡æ–°åˆ¤æ–­
-					index--;
+					exprLeftCount++;
 				}
-				state = ParseState::Normal;
-				break;
 			}
+			else if (ch == '}')
+			{
+				// ÈÏÎªÊÇ±í´ïÊ½ÄÚµÄ´óÀ¨ºÅ
+				if (exprLeftCount > 0)
+				{
+					exprLeftCount--;
+					continue;
+				}
+
+				replaceExpresses.emplace_back(logMessage.substr(leftBraceBegin + 1, index - leftBraceBegin - 1),
+					leftBraceBegin, index, true);
+
+
+				state = ParseState::Normal;
+			}
+			break;
+		}
+		case ParseState::RightBrace:
+		{
+			if (ch == '}' && (index == rightBraceBegin + 1))
+			{
+				replaceExpresses.emplace_back("}", rightBraceBegin, index, false);
+			}
+			else
+			{
+				//ÈÏÎª×óÓÒ´óÀ¨ºÅÊ§Åä£¬Ö®Ç°µÄ²»×ö´¦Àí£¬ÍË¸ñÒ»Î»»ØÈ¥ÖØĞÂÅĞ¶Ï
+				index--;
+			}
+			state = ParseState::Normal;
+			break;
+		}
 		}
 	}
 
@@ -1094,8 +1094,8 @@ void Debugger::DoLogMessage(std::shared_ptr<BreakPoint> bp)
 	}
 	else
 	{
-		// æ‹¼æ¥å­—ç¬¦ä¸²
-		// æ€ä¹ˆreplace å‡½æ•°éƒ½æ²¡æœ‰å•Š
+		// Æ´½Ó×Ö·û´®
+		// ÔõÃ´replace º¯Êı¶¼Ã»ÓĞ°¡
 
 		std::size_t start = 0;
 		for (std::size_t index = 0; index != replaceExpresses.size(); index++)
@@ -1196,11 +1196,11 @@ bool Debugger::DoHitCondition(std::shared_ptr<BreakPoint> bp)
 	enum class ParseState
 	{
 		ExpectedOperator,
-		// å¤§äº
+		// ´óÓÚ
 		Gt,
-		// å°äº
+		// Ğ¡ÓÚ
 		Le,
-		// å•ç­‰å· 
+		// µ¥µÈºÅ 
 		Eq,
 
 		ExpectedHitTimes,
@@ -1212,15 +1212,15 @@ bool Debugger::DoHitCondition(std::shared_ptr<BreakPoint> bp)
 
 	enum class Operator
 	{
-		// å¤§äº
+		// ´óÓÚ
 		Gt,
-		// å°äº
+		// Ğ¡ÓÚ
 		Le,
-		// å°äºç­‰äº
+		// Ğ¡ÓÚµÈÓÚ
 		LeEq,
-		// å¤§äºç­‰äº
+		// ´óÓÚµÈÓÚ
 		GtEq,
-		// åŒç­‰å·
+		// Ë«µÈºÅ
 		EqEq,
 	} evalOperator = Operator::EqEq;
 
@@ -1233,170 +1233,170 @@ bool Debugger::DoHitCondition(std::shared_ptr<BreakPoint> bp)
 		switch (state)
 		{
 		case ParseState::ExpectedOperator:
+		{
+			if (ch == ' ')
 			{
-				if (ch == ' ')
-				{
-					continue;
-				}
-
-				if (ch == '=')
-				{
-					state = ParseState::Eq;
-				}
-				else if (ch == '<')
-				{
-					state = ParseState::Le;
-				}
-				else if (ch == '>')
-				{
-					state = ParseState::Gt;
-				}
-				else
-				{
-					return false;
-				}
-
-				break;
+				continue;
 			}
+
+			if (ch == '=')
+			{
+				state = ParseState::Eq;
+			}
+			else if (ch == '<')
+			{
+				state = ParseState::Le;
+			}
+			else if (ch == '>')
+			{
+				state = ParseState::Gt;
+			}
+			else
+			{
+				return false;
+			}
+
+			break;
+		}
 		case ParseState::Eq:
+		{
+			if (ch == '=')
 			{
-				if (ch == '=')
-				{
-					evalOperator = Operator::EqEq;
-					state = ParseState::ExpectedHitTimes;
-				}
-				else
-				{
-					return false;
-				}
-				break;
+				evalOperator = Operator::EqEq;
+				state = ParseState::ExpectedHitTimes;
 			}
+			else
+			{
+				return false;
+			}
+			break;
+		}
 		case ParseState::Gt:
+		{
+			if (ch == '=')
 			{
-				if (ch == '=')
-				{
-					evalOperator = Operator::GtEq;
-					state = ParseState::ExpectedHitTimes;
-				}
-				else if (isdigit(ch))
-				{
-					evalOperator = Operator::Gt;
-					hitTimes = ch - '0';
-					state = ParseState::ParseDigit;
-				}
-				else if (ch == ' ')
-				{
-					evalOperator = Operator::Gt;
-					state = ParseState::ExpectedHitTimes;
-				}
-				else
-				{
-					return false;
-				}
-				break;
+				evalOperator = Operator::GtEq;
+				state = ParseState::ExpectedHitTimes;
 			}
+			else if (isdigit(ch))
+			{
+				evalOperator = Operator::Gt;
+				hitTimes = ch - '0';
+				state = ParseState::ParseDigit;
+			}
+			else if (ch == ' ')
+			{
+				evalOperator = Operator::Gt;
+				state = ParseState::ExpectedHitTimes;
+			}
+			else
+			{
+				return false;
+			}
+			break;
+		}
 		case ParseState::Le:
+		{
+			if (ch == '=')
 			{
-				if (ch == '=')
-				{
-					evalOperator = Operator::LeEq;
-					state = ParseState::ExpectedHitTimes;
-				}
-				else if (isdigit(ch))
-				{
-					evalOperator = Operator::Le;
-					hitTimes = ch - '0';
-					state = ParseState::ParseDigit;
-				}
-				else if (ch == ' ')
-				{
-					evalOperator = Operator::Gt;
-					state = ParseState::ExpectedHitTimes;
-				}
-				else
-				{
-					return false;
-				}
-				break;
+				evalOperator = Operator::LeEq;
+				state = ParseState::ExpectedHitTimes;
 			}
+			else if (isdigit(ch))
+			{
+				evalOperator = Operator::Le;
+				hitTimes = ch - '0';
+				state = ParseState::ParseDigit;
+			}
+			else if (ch == ' ')
+			{
+				evalOperator = Operator::Gt;
+				state = ParseState::ExpectedHitTimes;
+			}
+			else
+			{
+				return false;
+			}
+			break;
+		}
 		case ParseState::ExpectedHitTimes:
+		{
+			if (ch == ' ')
 			{
-				if (ch == ' ')
-				{
-					continue;
-				}
-				else if (isdigit(ch))
-				{
-					hitTimes = ch - '0';
-					state = ParseState::ParseDigit;
-				}
-				else
-				{
-					return false;
-				}
-				break;
+				continue;
 			}
+			else if (isdigit(ch))
+			{
+				hitTimes = ch - '0';
+				state = ParseState::ParseDigit;
+			}
+			else
+			{
+				return false;
+			}
+			break;
+		}
 		case ParseState::ParseDigit:
+		{
+			if (isdigit(ch))
 			{
-				if (isdigit(ch))
-				{
-					hitTimes = hitTimes * 10 + (ch - '0');
-				}
-				else if (ch == ' ')
-				{
-					state = ParseState::ParseFinish;
-				}
-				else
-				{
-					return false;
-				}
+				hitTimes = hitTimes * 10 + (ch - '0');
+			}
+			else if (ch == ' ')
+			{
+				state = ParseState::ParseFinish;
+			}
+			else
+			{
+				return false;
+			}
 
-				break;
-			}
+			break;
+		}
 		case ParseState::ParseFinish:
+		{
+			if (ch == ' ')
 			{
-				if (ch == ' ')
-				{
-					break;
-				}
-				else
-				{
-					return false;
-				}
 				break;
 			}
+			else
+			{
+				return false;
+			}
+			break;
+		}
 		}
 	}
 
 	switch (evalOperator)
 	{
 	case Operator::EqEq:
-		{
-			return bp->hitCount == hitTimes;
-		}
+	{
+		return bp->hitCount == hitTimes;
+	}
 	case Operator::Gt:
-		{
-			return bp->hitCount > hitTimes;
-		}
+	{
+		return bp->hitCount > hitTimes;
+	}
 	case Operator::GtEq:
-		{
-			return bp->hitCount >= hitTimes;
-		}
+	{
+		return bp->hitCount >= hitTimes;
+	}
 	case Operator::Le:
-		{
-			return bp->hitCount < hitTimes;
-		}
+	{
+		return bp->hitCount < hitTimes;
+	}
 	case Operator::LeEq:
-		{
-			return bp->hitCount <= hitTimes;
-		}
+	{
+		return bp->hitCount <= hitTimes;
+	}
 	}
 
 
 	return false;
 }
 
-// é‡å†™æ¨¡ç³ŠåŒ¹é…ç®—æ³•
+// ÖØĞ´Ä£ºıÆ¥ÅäËã·¨
 int Debugger::FuzzyMatchFileName(const std::string& chunkName, const std::string& fileName) const
 {
 	auto chunkSize = chunkName.size();
@@ -1405,7 +1405,7 @@ int Debugger::FuzzyMatchFileName(const std::string& chunkName, const std::string
 
 	std::size_t chunkExtSize = 0;
 	std::size_t fileExtSize = 0;
-	// trim æ‰åç¼€
+	// trim µôºó×º
 	for (const auto& ext : manager->extNames)
 	{
 		if (EndWith(chunkName, ext))
@@ -1428,7 +1428,7 @@ int Debugger::FuzzyMatchFileName(const std::string& chunkName, const std::string
 	chunkSize -= chunkExtSize;
 	fileSize -= fileExtSize;
 
-	// æˆ‘ä»¬ç”¨chunknameå»åŒ¹é…filename
+	// ÎÒÃÇÓÃchunknameÈ¥Æ¥Åäfilename
 	int maxMatchSize = static_cast<int>(std::min(chunkSize, fileSize));
 
 	int matchProcess = 1;
@@ -1440,17 +1440,17 @@ int Debugger::FuzzyMatchFileName(const std::string& chunkName, const std::string
 
 		if (cChar != fChar)
 		{
-			// ä»¥ä¸‹åŒ¹é…é¡ºåºæ˜¯æœ‰æ„ä¹‰çš„ï¼Œä¸è¦è½»æ˜“æ”¹å˜
+			// ÒÔÏÂÆ¥ÅäË³ĞòÊÇÓĞÒâÒåµÄ£¬²»ÒªÇáÒ×¸Ä±ä
 
 			if (::tolower(cChar) == ::tolower(fChar))
 			{
 				continue;
 			}
 
-			// è®¤ä¸ºæ¥è‡ªç¼–è¾‘å™¨çš„è·¯å¾„ä¸ä¼šæ˜¯ç›¸å¯¹è·¯å¾„
-			// chunknameæœ‰å¯èƒ½æ˜¯(./aaaa)ä¹Ÿå¯èƒ½æ˜¯(aaa/./bbb)
-			// å¹¶ä¸åŒ¹é…(../)çš„æƒ…å†µ
-			// å› ä¸º ../çš„è·¯å¾„æ„ä¹‰å¹¶ä¸å”¯ä¸€
+			// ÈÏÎªÀ´×Ô±à¼­Æ÷µÄÂ·¾¶²»»áÊÇÏà¶ÔÂ·¾¶
+			// chunknameÓĞ¿ÉÄÜÊÇ(./aaaa)Ò²¿ÉÄÜÊÇ(aaa/./bbb)
+			// ²¢²»Æ¥Åä(../)µÄÇé¿ö
+			// ÒòÎª ../µÄÂ·¾¶ÒâÒå²¢²»Î¨Ò»
 			if (cChar == '.')
 			{
 				std::size_t cLastindex = chunkSize - i + 1;
@@ -1468,27 +1468,27 @@ int Debugger::FuzzyMatchFileName(const std::string& chunkName, const std::string
 					break;
 				}
 
-				// è¯¥å€¼å¯èƒ½ä¸ºè´Ÿæ•°
+				// ¸ÃÖµ¿ÉÄÜÎª¸ºÊı
 				int cNextIndex = static_cast<int>(chunkSize) - i - 1;
 				if (cNextIndex < 0)
 				{
-					// åŒ¹é…å·²ç»å®Œæ¯•
+					// Æ¥ÅäÒÑ¾­Íê±Ï
 					break;
 				}
 
 				char cNextChar = chunkName[cNextIndex];
 
-				// é‚£chunkname å°±æ˜¯ aaa./bbbb é‚£å°±ä¸åŒ¹é…
+				// ÄÇchunkname ¾ÍÊÇ aaa./bbbb ÄÇ¾Í²»Æ¥Åä
 				if (cNextChar != '/' && cNextChar != '\\')
 				{
 					matchProcess = 0;
 					break;
 				}
 
-				// è¿™é‡Œä¼šæ¶ˆè€—æ‰ nextçš„åŒ¹é…
+				// ÕâÀï»áÏûºÄµô nextµÄÆ¥Åä
 				i++;
 
-				// è¿™é‡Œæ˜¯æŒ‡ä¿æŒä¸‹ä¸€æ¬¡å¾ªç¯æ—¶fCharä¸å˜
+				// ÕâÀïÊÇÖ¸±£³ÖÏÂÒ»´ÎÑ­»·Ê±fChar²»±ä
 				fileSize += 2;
 				continue;
 			}
@@ -1500,16 +1500,16 @@ int Debugger::FuzzyMatchFileName(const std::string& chunkName, const std::string
 					matchProcess++;
 					continue;
 				}
-				// ä¸€äº›äººä¼šå†™å‡º require './aaaa' è¿™ç§ä»£ç 
-				// å¯¼è‡´luaç¨‹åº çš„chunkname ç»™çš„æ˜¯ .\\/aaaa.lua
+				// Ò»Ğ©ÈË»áĞ´³ö require './aaaa' ÕâÖÖ´úÂë
+				// µ¼ÖÂlua³ÌĞò µÄchunkname ¸øµÄÊÇ .\\/aaaa.lua
 
 
-				//ä¿æŒfChar ä¸‹æ¬¡å¾ªç¯æ—¶ä¸å˜
+				//±£³ÖfChar ÏÂ´ÎÑ­»·Ê±²»±ä
 				fileSize++;
 				continue;
 			}
 
-			// é‚£å°±æ˜¯ä¸åŒ¹é…
+			// ÄÇ¾ÍÊÇ²»Æ¥Åä
 			matchProcess = 0;
 			break;
 		}
