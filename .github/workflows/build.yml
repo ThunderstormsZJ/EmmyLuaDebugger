@@ -1,11 +1,14 @@
 name: Emmy Debugger Core
 
-on: [push]
+on: 
+    push:
+       tags:
+        - 'v*'
 
 jobs:
   build-windows:
     name: Build Windows
-    runs-on: windows-2016
+    runs-on: windows-latest
     steps:
     - uses: actions/checkout@v1
     
@@ -37,7 +40,7 @@ jobs:
 
   build-darwin:
     name: Build Darwin
-    runs-on: macos-latest
+    runs-on: macOS-11
     steps:
     - uses: actions/checkout@v1
 
