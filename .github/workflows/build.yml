@@ -98,70 +98,21 @@ jobs:
           draft: false
           prerelease: true
       
-      - name: Download Windows-x86
-        uses: actions/download-artifact@v1.0.0
+      - name: Download Artifact
+        uses: actions/download-artifact@v2
         with:
-          name: x86
-          path: artifact/x86
-      
-      - name: Zip x86
-        uses: TheDoctor0/zip-release@v0.2.1
-        with:
-          filename: emmy_core@x86.zip
-          directory: artifact/x86
-      
-      - name: Upload x86
-        uses: actions/upload-release-asset@v1.0.1
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: emmy_core@x86.zip
-          asset_name: emmy_core@x86.zip
-          asset_content_type: application/tar+gzip
-      
-      - name: Download Windows-x64
-        uses: actions/download-artifact@v1.0.0
-        with:
-          name: x64
-          path: artifact/x64
-      
-      - name: Zip x64
-        uses: TheDoctor0/zip-release@v0.2.1
-        with:
-          filename: emmy_core@x64.zip
-          directory: artifact/x64
-      
-      - name: Upload x64
-        uses: actions/upload-release-asset@v1.0.1
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: emmy_core@x64.zip
-          asset_name: emmy_core@x64.zip
-          asset_content_type: application/tar+gzip
-          
-      - name: Download so
-        uses: actions/download-artifact@v1.0.0
-        with:
-          name: emmy_core.so
           path: artifact
       
-      - name: Upload so
+      - name: Zip Artifact
+        uses: TheDoctor0/zip-release@master
+        with:
+          filename: emmy_debugger.zip
+          directory: artifact
+      
+      - name: Upload Artifact
         uses: actions/upload-release-asset@v1.0.1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: artifact/emmy_core.so
-          asset_name: emmy_core.so
-          asset_content_type: application/gzip
-      
-      - name: Download dylib
-        uses: actions/download-artifact@v1.0.0
-        with:
-          name: emmy_core.dylib
-          path: artifact
-      
-      - name: Upload dylib
-        uses: actions/upload-release-asset@v1.0.1
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: artifact/emmy_core.dylib
-          asset_name: emmy_core.dylib
-          asset_content_type: application/gzip
+          asset_path: emmy_debugger.zip
+          asset_name: emmy_debugger.zip
+          asset_content_type: application/tar+gzip
