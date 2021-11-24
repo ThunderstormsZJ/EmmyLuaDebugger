@@ -113,6 +113,6 @@ jobs:
         uses: actions/upload-release-asset@v1.0.1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: emmy_debugger.zip
+          asset_path: artifact/emmy_debugger.zip
           asset_name: emmy_debugger.zip
           asset_content_type: application/tar+gzip
