@@ -108,7 +108,7 @@ jobs:
         uses: TheDoctor0/zip-release@v0.2.1
         with:
           filename: emmy_core@x86.zip
-          path: artifact/x86
+          directory: artifact/x86
       
       - name: Upload x86
         uses: actions/upload-release-asset@v1.0.1
@@ -128,7 +128,7 @@ jobs:
         uses: TheDoctor0/zip-release@v0.2.1
         with:
           filename: emmy_core@x64.zip
-          path: artifact/x64
+          directory: artifact/x64
       
       - name: Upload x64
         uses: actions/upload-release-asset@v1.0.1
